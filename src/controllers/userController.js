@@ -1,7 +1,6 @@
 const db = require('../services/db');
 
 exports.getUsers = async (req, res) => {
-    // Tylko admin może pobierać listę użytkowników
     if (req.user.role !== 'admin') {
         return res.status(403).json({ message: 'Brak uprawnień' });
     }

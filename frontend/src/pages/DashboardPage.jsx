@@ -9,7 +9,6 @@ import { LogOut, User, Shield, Calendar, Building, History } from 'lucide-react'
 const DashboardPage = () => {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate();
-    // Ten klucz będzie służył do "siłowego" odświeżenia komponentów po zmianach
     const [refreshKey, setRefreshKey] = useState(0);
 
     const handleDataChange = useCallback(() => {

@@ -1,10 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: '/api', // Dzięki proxy w vite.config.js, to zostanie przekierowane do http://localhost:3000/api
+    baseURL: '/api',
 });
 
-// Interceptor, który dodaje token do każdego żądania
 api.interceptors.request.use(config => {
     const token = localStorage.getItem('token');
     if (token) {

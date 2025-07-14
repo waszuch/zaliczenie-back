@@ -9,7 +9,6 @@ exports.createBooking = async (req, res) => {
         return res.status(400).json({ message: 'ID salki oraz czas rozpoczęcia i zakończenia są wymagane.' });
     }
 
-    // Walidacja dat
     const start = new Date(startTime);
     const end = new Date(endTime);
     const now = new Date();
@@ -27,7 +26,6 @@ exports.createBooking = async (req, res) => {
     }
 
     try {
-        // Sprawdzenie, czy termin nie jest zajęty
         const existingBooking = await db.query(
             `SELECT * FROM bookings 
              WHERE room_id = $1 AND (
@@ -54,12 +52,11 @@ exports.createBooking = async (req, res) => {
 };
 
 exports.getBookings = async (req, res) => {
-    const { userId } = req.query; // Nowy parametr filtra użytkownika
+    const { userId } = req.query;
     
     try {
         let result;
         if (req.user.role === 'admin') {
-            // Admin widzi wszystko lub filtruje po konkretnym użytkowniku
             if (userId && userId !== 'all') {
                 result = await db.query(`
                     SELECT b.id, b.user_id, b.room_id, b.start_time, b.end_time, u.username, r.name as room_name 
@@ -70,7 +67,6 @@ exports.getBookings = async (req, res) => {
                     ORDER BY b.start_time DESC
                 `, [userId]);
             } else {
-                // Wszystkich użytkowników
                 result = await db.query(`
                     SELECT b.id, b.user_id, b.room_id, b.start_time, b.end_time, u.username, r.name as room_name 
                     FROM bookings b
@@ -80,7 +76,6 @@ exports.getBookings = async (req, res) => {
                 `);
             }
         } else {
-            // Zwykły user widzi tylko swoje
             result = await db.query(`
                 SELECT b.id, b.user_id, b.room_id, b.start_time, b.end_time, r.name as room_name 
                 FROM bookings b
@@ -104,7 +99,6 @@ exports.updateBooking = async (req, res) => {
         return res.status(400).json({ message: 'Wszystkie pola są wymagane do aktualizacji.' });
     }
 
-    // Walidacja dat
     const start = new Date(startTime);
     const end = new Date(endTime);
     const now = new Date();
@@ -122,7 +116,6 @@ exports.updateBooking = async (req, res) => {
     }
 
     try {
-        // Sprawdź czy rezerwacja istnieje i czy użytkownik ma prawo ją edytować
         const bookingCheck = await db.query(
             'SELECT * FROM bookings WHERE id = $1',
             [id]
@@ -134,12 +127,10 @@ exports.updateBooking = async (req, res) => {
 
         const booking = bookingCheck.rows[0];
         
-        // Sprawdź czy użytkownik jest właścicielem rezerwacji lub administratorem
         if (req.user.role !== 'admin' && booking.user_id !== req.user.id) {
             return res.status(403).json({ message: 'Nie masz uprawnień do edytowania tej rezerwacji.' });
         }
 
-        // Sprawdzamy kolizje, wykluczając edytowaną rezerwację
         const existingBooking = await db.query(
             `SELECT * FROM bookings 
              WHERE room_id = $1 AND id != $2 AND ((start_time, end_time) OVERLAPS ($3, $4))`,
@@ -173,13 +164,12 @@ exports.deleteBooking = async (req, res) => {
 };
 
 exports.getCalendarBookings = async (req, res) => {
-    const { startDate, endDate, userId } = req.query; // Dodano userId
+    const { startDate, endDate, userId } = req.query;
     
     try {
         let result;
         
         if (req.user.role === 'admin') {
-            // Admin widzi wszystkie rezerwacje z pełnymi danymi lub filtruje po użytkowniku
             if (userId && userId !== 'all') {
                 result = await db.query(`
                     SELECT 
@@ -200,7 +190,6 @@ exports.getCalendarBookings = async (req, res) => {
                     ORDER BY b.start_time
                 `, [startDate || null, endDate || null, userId]);
             } else {
-                // Wszystkich użytkowników
                 result = await db.query(`
                     SELECT 
                         b.id, 
@@ -220,7 +209,6 @@ exports.getCalendarBookings = async (req, res) => {
                 `, [startDate || null, endDate || null]);
             }
         } else {
-            // Zwykły user widzi tylko informacje o tym które sale są zajęte (bez danych osobowych)
             result = await db.query(`
                 SELECT 
                     b.id,

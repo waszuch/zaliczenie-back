@@ -30,8 +30,8 @@ const HistoryPage = () => {
     const [selectedUserId, setSelectedUserId] = useState('all');
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all'); // all, upcoming, past
-    const [sortOrder, setSortOrder] = useState('desc'); // desc, asc
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [sortOrder, setSortOrder] = useState('desc');
     const [showFilters, setShowFilters] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
@@ -50,7 +50,6 @@ const HistoryPage = () => {
             setLoading(true);
             const params = {};
             
-            // Dodaj filtr użytkownika dla adminów
             if (user?.role === 'admin' && selectedUserId) {
                 params.userId = selectedUserId;
             }
@@ -77,37 +76,32 @@ const HistoryPage = () => {
 
     const handleUserChange = (userId) => {
         setSelectedUserId(userId);
-        setCurrentPage(1); // Reset pagination
+        setCurrentPage(1);
     };
 
     const filterAndSortBookings = () => {
         let filtered = [...bookings];
         const now = new Date();
 
-        // Filtrowanie po statusie
         if (filterStatus === 'upcoming') {
             filtered = filtered.filter(booking => new Date(booking.start_time) > now);
         } else if (filterStatus === 'past') {
             filtered = filtered.filter(booking => new Date(booking.end_time) < now);
         }
 
-        // Wyszukiwanie
         if (searchTerm) {
             if (user?.role === 'admin') {
-                // Admin może szukać po nazwie sali i nazwie użytkownika
                 filtered = filtered.filter(booking =>
                     booking.room_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     (booking.username && booking.username.toLowerCase().includes(searchTerm.toLowerCase()))
                 );
             } else {
-                // Zwykły użytkownik szuka tylko po nazwie sali
                 filtered = filtered.filter(booking =>
                     booking.room_name.toLowerCase().includes(searchTerm.toLowerCase())
                 );
             }
         }
 
-        // Sortowanie
         filtered.sort((a, b) => {
             const dateA = new Date(a.start_time);
             const dateB = new Date(b.start_time);
@@ -115,7 +109,7 @@ const HistoryPage = () => {
         });
 
         setFilteredBookings(filtered);
-        setCurrentPage(1); // Reset pagination when filtering
+        setCurrentPage(1);
     };
 
     const getStatusBadge = (booking) => {
@@ -162,7 +156,6 @@ const HistoryPage = () => {
         navigate('/calendar');
     };
 
-    // Paginacja
     const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -182,7 +175,6 @@ const HistoryPage = () => {
 
     return (
         <div className="history-page">
-            {/* Header */}
             <header className="history-page-header">
                 <div className="history-page-nav">
                     <button onClick={goBackToDashboard} className="btn btn-secondary">
@@ -216,7 +208,6 @@ const HistoryPage = () => {
                 </div>
             </header>
 
-            {/* Filtr użytkowników dla adminów */}
             {user?.role === 'admin' && (
                 <div className="history-user-filter">
                     <div className="user-filter">
@@ -245,7 +236,6 @@ const HistoryPage = () => {
                 </div>
             )}
 
-            {/* Filtry i wyszukiwarka */}
             <div className="history-controls">
                 <div className="search-section">
                     <div className="search-box">
@@ -296,7 +286,6 @@ const HistoryPage = () => {
                 )}
             </div>
 
-            {/* Statystyki */}
             <div className="history-stats">
                 <div className="stat-card">
                     <span className="stat-number">{filteredBookings.length}</span>
@@ -318,7 +307,6 @@ const HistoryPage = () => {
                 </div>
             </div>
 
-            {/* Lista rezerwacji */}
             <main className="history-content">
                 {currentBookings.length === 0 ? (
                     <div className="empty-state">
@@ -379,7 +367,6 @@ const HistoryPage = () => {
                     </div>
                 )}
 
-                {/* Paginacja */}
                 {totalPages > 1 && (
                     <div className="pagination">
                         <button 

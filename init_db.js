@@ -33,7 +33,6 @@ async function initDb() {
 
         console.log('Tabele zostały utworzone.');
 
-        // Dodanie przykładowego admina i salek
         const adminPassword = await bcrypt.hash('admin123', 10);
         await db.query(
             'INSERT INTO users (username, password, role) VALUES ($1, $2, $3) ON CONFLICT (username) DO NOTHING',

@@ -32,7 +32,7 @@ const RoomList = ({ onDataChange }) => {
         if (window.confirm('Czy na pewno chcesz usunąć tę salkę?')) {
             try {
                 await api.delete(`/rooms/${roomId}`);
-                fetchRooms(); // Odśwież listę po usunięciu
+                fetchRooms();
                 if (onDataChange) onDataChange();
             } catch (err) {
                 alert('Nie udało się usunąć salki.');

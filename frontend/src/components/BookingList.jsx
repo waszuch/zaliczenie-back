@@ -22,7 +22,6 @@ const EditBookingForm = ({ booking, rooms, onUpdate, onCancel }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Ustaw minimalną datę na teraz
     const now = new Date();
     const today = now.toISOString().slice(0, 16);
 
@@ -31,7 +30,6 @@ const EditBookingForm = ({ booking, rooms, onUpdate, onCancel }) => {
         setIsLoading(true);
         setError('');
         
-        // Walidacja dat
         if (!startTime || !endTime) {
             setError('Oba pola daty są wymagane.');
             setIsLoading(false);
@@ -44,7 +42,6 @@ const EditBookingForm = ({ booking, rooms, onUpdate, onCancel }) => {
             return;
         }
 
-        // Sprawdź czy data nie jest w przeszłości
         if (new Date(startTime) < new Date()) {
             setError('Nie można przebookować na termin w przeszłości.');
             setIsLoading(false);
@@ -179,7 +176,7 @@ const BookingList = () => {
 
     useEffect(() => {
         fetchBookings();
-        fetchRooms(); // Wszyscy użytkownicy mogą pobrać sale do edycji rezerwacji
+        fetchRooms();
     }, [fetchBookings, fetchRooms]);
 
     const handleDelete = async (id) => {
@@ -264,7 +261,6 @@ const BookingList = () => {
                                 </div>
                             </div>
                             
-                            {/* Edycja - użytkownik może edytować swoje rezerwacje, admin wszystkie */}
                             {(user.role === 'admin' || booking.user_id === user.id) && (
                                 <div className="flex gap-2">
                                     <button 
@@ -275,7 +271,6 @@ const BookingList = () => {
                                         <Edit3 size={16} />
                                     </button>
                                     
-                                    {/* Tylko admin może usuwać rezerwacje */}
                                     {user.role === 'admin' && (
                                         <button 
                                             onClick={() => handleDelete(booking.id)} 

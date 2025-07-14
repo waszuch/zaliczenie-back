@@ -15,7 +15,7 @@ import {
     Clock
 } from 'lucide-react';
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i); // 0:00 - 23:00
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const DAYS = ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie'];
 
 const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
@@ -27,11 +27,10 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
     const [isCreating, setIsCreating] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(null);
 
-    // Pobierz datę początku i końca tygodnia
     const getWeekRange = (date) => {
         const start = new Date(date);
         const day = start.getDay();
-        const diff = start.getDate() - day + (day === 0 ? -6 : 1); // dostosowanie dla poniedziałku jako pierwszego dnia
+        const diff = start.getDate() - day + (day === 0 ? -6 : 1);
         start.setDate(diff);
         start.setHours(0, 0, 0, 0);
         
@@ -42,7 +41,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
         return { start, end };
     };
 
-    // Pobierz dni tygodnia
     const getWeekDays = (startDate) => {
         const days = [];
         for (let i = 0; i < 7; i++) {
@@ -62,7 +60,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
                 endDate: end.toISOString().split('T')[0]
             };
             
-            // Dodaj filtr użytkownika dla adminów
             if (user?.role === 'admin' && selectedUserId) {
                 params.userId = selectedUserId;
             }
@@ -78,9 +75,8 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
 
     useEffect(() => {
         fetchCalendarBookings();
-    }, [currentWeek, selectedUserId]); // Dodano selectedUserId do dependencies
+    }, [currentWeek, selectedUserId]);
 
-    // Nawigacja tygodni
     const goToPreviousWeek = () => {
         const newDate = new Date(currentWeek);
         newDate.setDate(newDate.getDate() - 7);
@@ -97,7 +93,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
         setCurrentWeek(new Date());
     };
 
-    // Sprawdź czy rezerwacja mieści się w danym slonie
     const getBookingForSlot = (dayDate, hour) => {
         return bookings.filter(booking => {
             const startTime = new Date(booking.start_time);
@@ -111,7 +106,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
         });
     };
 
-    // Formatowanie czasu
     const formatTime = (timeString) => {
         return new Date(timeString).toLocaleTimeString('pl-PL', {
             hour: '2-digit',
@@ -119,27 +113,23 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
         });
     };
 
-    // Obsługa kliknięcia w pustą komórkę (tylko dla admina)
     const handleSlotClick = (dayDate, hour) => {
         if (user?.role !== 'admin') return;
 
         const slotStart = new Date(dayDate);
         slotStart.setHours(hour, 0, 0, 0);
         
-        // Sprawdź czy slot nie jest w przeszłości
         if (slotStart < new Date()) return;
 
         setSelectedSlot({ date: dayDate, hour });
         setIsCreating(true);
     };
 
-    // Obsługa edycji rezerwacji
     const handleEditBooking = (booking) => {
         if (user?.role !== 'admin' && booking.user_id !== user?.id) return;
         setEditingBooking(booking);
     };
 
-    // Zapisz edytowaną rezerwację
     const saveEditedBooking = async (bookingData) => {
         try {
             await api.put(`/bookings/${editingBooking.id}`, bookingData);
@@ -152,7 +142,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
         }
     };
 
-    // Usuń rezerwację (tylko admin)
     const deleteBooking = async (bookingId) => {
         if (user?.role !== 'admin') return;
         
@@ -168,7 +157,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
         }
     };
 
-    // Stwórz nową rezerwację
     const createBooking = async (bookingData) => {
         try {
             await api.post('/bookings', bookingData);
@@ -191,7 +179,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
 
     return (
         <div className="calendar-view">
-            {/* Nagłówek kalendarza */}
             <div className="calendar-header">
                 <div className="calendar-navigation">
                     <button onClick={goToPreviousWeek} className="btn btn-sm">
@@ -210,9 +197,7 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
                 </h3>
             </div>
 
-            {/* Grid kalendarza */}
             <div className="calendar-grid">
-                {/* Nagłówek z dniami */}
                 <div className="calendar-grid-header">
                     <div className="time-column-header">Godzina</div>
                     {weekDays.map((day, index) => (
@@ -223,7 +208,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
                     ))}
                 </div>
 
-                {/* Rzędy z godzinami */}
                 <div className="calendar-grid-body">
                     {HOURS.map(hour => (
                         <div key={hour} className="calendar-row">
@@ -275,7 +259,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
                 </div>
             </div>
 
-            {/* Modal do edycji rezerwacji */}
             {editingBooking && (
                 <BookingEditModal
                     booking={editingBooking}
@@ -287,7 +270,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
                 />
             )}
 
-            {/* Modal do tworzenia rezerwacji */}
             {isCreating && selectedSlot && (
                 <BookingCreateModal
                     selectedSlot={selectedSlot}
@@ -303,7 +285,6 @@ const CalendarView = ({ rooms, onDataChange, selectedUserId }) => {
     );
 };
 
-// Modal do edycji rezerwacji
 const BookingEditModal = ({ booking, rooms, onSave, onCancel, onDelete, isAdmin }) => {
     const [roomId, setRoomId] = useState(booking.room_id);
     const [startTime, setStartTime] = useState(new Date(booking.start_time).toISOString().slice(0, 16));
@@ -381,7 +362,6 @@ const BookingEditModal = ({ booking, rooms, onSave, onCancel, onDelete, isAdmin 
     );
 };
 
-// Modal do tworzenia rezerwacji
 const BookingCreateModal = ({ selectedSlot, rooms, onCreate, onCancel }) => {
     const [roomId, setRoomId] = useState(rooms[0]?.id || '');
     const [startTime, setStartTime] = useState(() => {

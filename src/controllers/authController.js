@@ -21,7 +21,7 @@ exports.register = async (req, res) => {
 
         res.status(201).json({ message: 'Użytkownik zarejestrowany pomyślnie.', user: newUser });
     } catch (error) {
-        if (error.code === '23505') { // Unikalny klucz naruszony
+        if (error.code === '23505') {
             return res.status(409).json({ message: 'Użytkownik o tej nazwie już istnieje.' });
         }
         console.error(error);

@@ -49,12 +49,11 @@ const CalendarPage = () => {
 
     const handleUserChange = (userId) => {
         setSelectedUserId(userId);
-        setRefreshKey(oldKey => oldKey + 1); // Odśwież kalendarz
+        setRefreshKey(oldKey => oldKey + 1);
     };
 
     return (
         <div className="calendar-page">
-            {/* Header kalendarza */}
             <header className="calendar-page-header">
                 <div className="calendar-page-nav">
                     <button 
@@ -91,7 +90,6 @@ const CalendarPage = () => {
                 </div>
             </header>
 
-            {/* Filtr użytkowników dla adminów */}
             {user?.role === 'admin' && (
                 <div className="calendar-filters">
                     <div className="user-filter">
@@ -120,7 +118,6 @@ const CalendarPage = () => {
                 </div>
             )}
 
-            {/* Główny widok kalendarza */}
             <main className="calendar-page-content">
                 <CalendarView 
                     rooms={rooms} 

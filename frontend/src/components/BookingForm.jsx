@@ -26,7 +26,6 @@ const BookingForm = ({ roomId, onBookingSuccess }) => {
             return;
         }
 
-        // Sprawdź czy data nie jest w przeszłości
         if (new Date(startTime) < new Date()) {
             setError('Nie można rezerwować sal w przeszłości.');
             setIsLoading(false);
@@ -55,7 +54,6 @@ const BookingForm = ({ roomId, onBookingSuccess }) => {
         }
     };
 
-    // Ustaw minimalną datę na dzisiaj
     const now = new Date();
     const today = now.toISOString().slice(0, 16);
 

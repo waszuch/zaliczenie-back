@@ -62,7 +62,7 @@ exports.deleteRoom = async (req, res) => {
         if (result.rowCount === 0) {
             return res.status(404).json({ message: 'Salka o podanym ID nie istnieje.' });
         }
-        res.status(204).send(); // No Content
+        res.status(204).send();
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Błąd serwera podczas usuwania salki.' });
