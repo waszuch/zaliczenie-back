@@ -7,6 +7,9 @@ const bookingController = require('../controllers/bookingController');
 // GET /api/bookings - Pobierz wszystkie rezerwacje (admin) lub swoje (user)
 router.get('/', protect, bookingController.getBookings);
 
+// GET /api/bookings/calendar - Pobierz rezerwacje dla kalendarza
+router.get('/calendar', protect, bookingController.getCalendarBookings);
+
 // POST /api/bookings - Stwórz nową rezerwację
 router.post('/', protect, bookingController.createBooking);
 

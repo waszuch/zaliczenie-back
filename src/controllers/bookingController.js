@@ -54,17 +54,31 @@ exports.createBooking = async (req, res) => {
 };
 
 exports.getBookings = async (req, res) => {
+    const { userId } = req.query; // Nowy parametr filtra użytkownika
+    
     try {
         let result;
         if (req.user.role === 'admin') {
-            // Admin widzi wszystko
-            result = await db.query(`
-                SELECT b.id, b.user_id, b.room_id, b.start_time, b.end_time, u.username, r.name as room_name 
-                FROM bookings b
-                JOIN users u ON b.user_id = u.id
-                JOIN rooms r ON b.room_id = r.id
-                ORDER BY b.start_time DESC
-            `);
+            // Admin widzi wszystko lub filtruje po konkretnym użytkowniku
+            if (userId && userId !== 'all') {
+                result = await db.query(`
+                    SELECT b.id, b.user_id, b.room_id, b.start_time, b.end_time, u.username, r.name as room_name 
+                    FROM bookings b
+                    JOIN users u ON b.user_id = u.id
+                    JOIN rooms r ON b.room_id = r.id
+                    WHERE b.user_id = $1
+                    ORDER BY b.start_time DESC
+                `, [userId]);
+            } else {
+                // Wszystkich użytkowników
+                result = await db.query(`
+                    SELECT b.id, b.user_id, b.room_id, b.start_time, b.end_time, u.username, r.name as room_name 
+                    FROM bookings b
+                    JOIN users u ON b.user_id = u.id
+                    JOIN rooms r ON b.room_id = r.id
+                    ORDER BY b.start_time DESC
+                `);
+            }
         } else {
             // Zwykły user widzi tylko swoje
             result = await db.query(`
@@ -155,5 +169,86 @@ exports.deleteBooking = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Błąd serwera podczas usuwania rezerwacji.' });
+    }
+};
+
+exports.getCalendarBookings = async (req, res) => {
+    const { startDate, endDate, userId } = req.query; // Dodano userId
+    
+    try {
+        let result;
+        
+        if (req.user.role === 'admin') {
+            // Admin widzi wszystkie rezerwacje z pełnymi danymi lub filtruje po użytkowniku
+            if (userId && userId !== 'all') {
+                result = await db.query(`
+                    SELECT 
+                        b.id, 
+                        b.user_id, 
+                        b.room_id, 
+                        b.start_time, 
+                        b.end_time, 
+                        u.username, 
+                        r.name as room_name,
+                        r.capacity
+                    FROM bookings b
+                    JOIN users u ON b.user_id = u.id
+                    JOIN rooms r ON b.room_id = r.id
+                    WHERE b.user_id = $3
+                      AND ($1::date IS NULL OR DATE(b.start_time) >= $1::date)
+                      AND ($2::date IS NULL OR DATE(b.end_time) <= $2::date)
+                    ORDER BY b.start_time
+                `, [startDate || null, endDate || null, userId]);
+            } else {
+                // Wszystkich użytkowników
+                result = await db.query(`
+                    SELECT 
+                        b.id, 
+                        b.user_id, 
+                        b.room_id, 
+                        b.start_time, 
+                        b.end_time, 
+                        u.username, 
+                        r.name as room_name,
+                        r.capacity
+                    FROM bookings b
+                    JOIN users u ON b.user_id = u.id
+                    JOIN rooms r ON b.room_id = r.id
+                    WHERE ($1::date IS NULL OR DATE(b.start_time) >= $1::date)
+                      AND ($2::date IS NULL OR DATE(b.end_time) <= $2::date)
+                    ORDER BY b.start_time
+                `, [startDate || null, endDate || null]);
+            }
+        } else {
+            // Zwykły user widzi tylko informacje o tym które sale są zajęte (bez danych osobowych)
+            result = await db.query(`
+                SELECT 
+                    b.id,
+                    b.room_id, 
+                    b.start_time, 
+                    b.end_time, 
+                    r.name as room_name,
+                    r.capacity,
+                    CASE 
+                        WHEN b.user_id = $3 THEN u.username 
+                        ELSE 'Zarezerwowane' 
+                    END as username,
+                    CASE 
+                        WHEN b.user_id = $3 THEN b.user_id 
+                        ELSE NULL 
+                    END as user_id
+                FROM bookings b
+                JOIN users u ON b.user_id = u.id
+                JOIN rooms r ON b.room_id = r.id
+                WHERE ($1::date IS NULL OR DATE(b.start_time) >= $1::date)
+                  AND ($2::date IS NULL OR DATE(b.end_time) <= $2::date)
+                ORDER BY b.start_time
+            `, [startDate || null, endDate || null, req.user.id]);
+        }
+        
+        res.json(result.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Błąd serwera podczas pobierania rezerwacji kalendarza.' });
     }
 }; 

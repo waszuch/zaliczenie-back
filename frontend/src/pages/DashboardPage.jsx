@@ -1,18 +1,28 @@
 import React, { useContext, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '@/context/AuthContext';
 import RoomList from '@/components/RoomList';
 import BookingList from '@/components/BookingList';
 import AddRoomForm from '@/components/AddRoomForm';
-import { LogOut, User, Shield, Calendar, Building } from 'lucide-react';
+import { LogOut, User, Shield, Calendar, Building, History } from 'lucide-react';
 
 const DashboardPage = () => {
     const { user, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
     // Ten klucz będzie służył do "siłowego" odświeżenia komponentów po zmianach
     const [refreshKey, setRefreshKey] = useState(0);
 
     const handleDataChange = useCallback(() => {
         setRefreshKey(oldKey => oldKey + 1);
     }, []);
+
+    const goToCalendar = () => {
+        navigate('/calendar');
+    };
+
+    const goToHistory = () => {
+        navigate('/history');
+    };
 
     return (
         <div className="app-container">
@@ -31,10 +41,26 @@ const DashboardPage = () => {
                         {user?.role === 'admin' ? 'Administrator' : 'Użytkownik'}
                     </div>
                 </div>
-                <button onClick={logout} className="btn btn-secondary">
-                    <LogOut size={20} />
-                    Wyloguj się
-                </button>
+                <div className="header-actions">
+                    <button 
+                        onClick={goToCalendar} 
+                        className="btn btn-primary"
+                    >
+                        <Calendar size={20} />
+                        Kalendarz
+                    </button>
+                    <button 
+                        onClick={goToHistory} 
+                        className="btn btn-secondary"
+                    >
+                        <History size={20} />
+                        Historia
+                    </button>
+                    <button onClick={logout} className="btn btn-secondary">
+                        <LogOut size={20} />
+                        Wyloguj się
+                    </button>
+                </div>
             </header>
 
             <div className="dashboard-content">

@@ -4,6 +4,8 @@ import { AuthContext } from '@/context/AuthContext';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import DashboardPage from '@/pages/DashboardPage';
+import CalendarPage from '@/pages/CalendarPage';
+import HistoryPage from '@/pages/HistoryPage';
 import { Building2 } from 'lucide-react';
 import '@/App.css';
 
@@ -26,9 +28,12 @@ function App() {
         )}
         
         <Routes>
-          <Route path="/" element={user ? <DashboardPage /> : <Navigate to="/login" />} />
-          <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
-          <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
+          <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
+          <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" />} />
+          <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/dashboard" />} />
+          <Route path="/dashboard" element={user ? <DashboardPage /> : <Navigate to="/login" />} />
+          <Route path="/calendar" element={user ? <CalendarPage /> : <Navigate to="/login" />} />
+          <Route path="/history" element={user ? <HistoryPage /> : <Navigate to="/login" />} />
         </Routes>
       </div>
     </Router>
